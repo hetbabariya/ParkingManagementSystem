@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - Vehicle Parking System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+  <div class="container-fluid">
+    <span class="navbar-text text-danger fw-bold me-3">Welcome to User</span>
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <li class="nav-item"><a class="nav-link active" id="menu-home" href="#">Home</a></li>
+      <li class="nav-item"><a class="nav-link" id="menu-summary" href="#">Summary</a></li>
+      <li class="nav-item"><a class="nav-link" id="menu-logout" href="#">Logout</a></li>
+    </ul>
+  </div>
+</nav>
+<div class="container-fluid">
+  <div id="user-alerts"></div>
+  <!-- Home Section -->
+  <div id="section-home">
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card mb-3">
+          <div class="card-header">Recent Parking History</div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Location</th><th>Vehicle No</th><th>Check In</th><th>Check Out</th>
+                  </tr>
+                </thead>
+                <tbody id="history-table-body">
+                  <!-- Filled by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Search Lots -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">Search Parking @Location/Pin Code</div>
+          <div class="card-body">
+            <form class="row g-2 align-items-center" id="search-lots-form">
+              <div class="col-auto">
+                <input type="text" class="form-control" id="search-lots-input" placeholder="Enter location or pin code">
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Search</button>
+              </div>
+            </form>
+            <div class="table-responsive mt-3">
+              <table class="table table-bordered table-sm mb-0">
+                <thead>
+                  <tr><th>ID</th><th>Name</th><th>Location</th><th>Pincode</th><th>Hourly Rate</th><th>Avaibility</th></tr>
+                </thead>
+                <tbody id="lots-search-results">
+                  <!-- Filled by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Book Modal -->
+  <div class="modal fade" id="bookModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="book-spot-form">
+          <div class="modal-header bg-warning-subtle">
+            <h5 class="modal-title">Book the parking spot</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <!-- <div class="mb-2"><label class="form-label">Spot ID</label><input type="text" class="form-control" id="book-spot-id" readonly></div> -->
+            <div class="mb-2"><label class="form-label">Lot ID</label><input type="text" class="form-control" id="book-lot-id" readonly></div>
+            <div class="mb-2"><label class="form-label">User ID</label><input type="text" class="form-control" id="book-user-id" readonly></div>
+            <div class="mb-2"><label class="form-label">Vehicle Number</label><input type="text" class="form-control" id="book-vehicle-number" required></div>
+            <!-- Add more fields if needed -->
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Reserve</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Release Modal -->
+  <div class="modal fade" id="releaseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="release-spot-form">
+          <div class="modal-header bg-warning-subtle">
+            <h5 class="modal-title">Release the parking spot</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-2"><label class="form-label">Spot ID</label><input type="text" class="form-control" id="release-spot-id" readonly></div>
+            <div class="mb-2"><label class="form-label">Parking Time</label><input type="text" class="form-control" id="release-parking-time" readonly></div>
+            <div class="mb-2"><label class="form-label">Releasing Time</label><input type="text" class="form-control" id="release-releasing-time" readonly></div>
+            <div class="mb-2"><label class="form-label">Total Cost</label><input type="text" class="form-control" id="release-total-cost" readonly></div>
+            <!-- Add more fields if needed -->
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Release</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Summary Section -->
+  <div id="section-summary" style="display:none;">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">Usage Summary</div>
+          <div class="card-body">
+            <div id="user-summary-content">
+              <!-- Chart or stats will be rendered here by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/api.js"></script>
+<script src="js/user.js"></script>
+</body>
+</html> 
