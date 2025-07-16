@@ -36,6 +36,14 @@ def reserve_parking_spot(lot_id):
     data = request.get_json()
     vehicle_number = data.get('vehicle_number')
 
+    # Prevent double booking by user or vehicle
+    existing_user_res = Reservation.query.filter_by(account_id=account_id, reservation_status='active').first()
+    if existing_user_res:
+        return jsonify({'error': 'You already have an active reservation. Please release your current spot before booking another.'}), 400
+    existing_vehicle_res = Reservation.query.filter_by(vehicle_number=vehicle_number, reservation_status='active').first()
+    if existing_vehicle_res:
+        return jsonify({'error': 'This vehicle already has an active reservation. Please release the current spot before booking another.'}), 400
+
     available_spot = Spot.query.filter_by(lot_id=lot_id, availability='available').first()
     if not available_spot:
         return jsonify({'error': 'No free spots in the selected lot'}), 400

@@ -60,17 +60,57 @@ def create_parking_lot():
 def update_parking_lot(lot_id):
     if session.get('role') != 'admin':
         return jsonify({'error': 'Access denied'}), 403
+
     lot = Lot.query.get(lot_id)
     if not lot:
         return jsonify({'error': 'Parking lot not found'}), 404
+
     data = request.get_json()
-    lot.lot_name = data.get('lot_name', lot.lot_name)
+    new_lot_name = data.get('lot_name', lot.lot_name)
+
+    existing_lot = Lot.query.filter_by(lot_name=new_lot_name).first()
+    if existing_lot and existing_lot.lot_id != lot.lot_id:
+        return jsonify({'error': 'Lot name already exists. Please choose a different name.'}), 400
+
+    current_total_spots = lot.total_spots
+    new_total_spots = int(data.get('total_spots', current_total_spots))
+
+    lot.lot_name = new_lot_name
     lot.lot_location = data.get('lot_location', lot.lot_location)
     lot.pincode = data.get('pincode', lot.pincode)
     lot.hourly_rate = data.get('hourly_rate', lot.hourly_rate)
-    lot.total_spots = data.get('total_spots', lot.total_spots)
+    lot.total_spots = new_total_spots
     database.session.commit()
-    return jsonify({'message': 'Parking lot updated successfully.'})
+
+    if new_total_spots > current_total_spots:
+        for i in range(current_total_spots + 1, new_total_spots + 1):
+            new_spot = Spot(
+                lot_id=lot.lot_id,
+                identifier=i,
+                availability='available'
+            )
+            database.session.add(new_spot)
+        database.session.commit()
+
+    elif new_total_spots < current_total_spots:
+        spots_to_delete = Spot.query.filter(
+            Spot.lot_id == lot.lot_id,
+            Spot.identifier > new_total_spots
+        ).all()
+
+        reserved_spots = [s.identifier for s in spots_to_delete if s.availability != 'available']
+        if reserved_spots:
+            return jsonify({
+                'error': f'Cannot reduce total_spots. Spots currently reserved: {reserved_spots}'
+            }), 400
+
+        for spot in spots_to_delete:
+            database.session.delete(spot)
+        database.session.commit()
+
+    return jsonify({'message': 'Parking lot updated successfully with updated spots.'})
+
+
 
 @admin_routes.route('/admin/lots/<int:lot_id>', methods=['DELETE'])
 def delete_parking_lot(lot_id):
